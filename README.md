@@ -83,9 +83,9 @@ Statistics  ![491196992_1002637435329595_5850497252059026516_n](https://github.c
 - Android - ทดสอบบนอุปกรณ์จริงและ Emulator 
 
 3.3 ไฟล์ README และวิธีติดตั้ง | README & Install Guide
-- ดาวน์โหลดไฟล์ .apk จากลิงก์ที่แนบไว้
-- เปิดในอุปกรณ์ Android
-- ติดตั้งผ่าน File Manager
+1 ดาวน์โหลดไฟล์ .apk จากลิงก์ที่แนบไว้
+2 เปิดในอุปกรณ์ Android
+3 ติดตั้งผ่าน File Manager
 
 4. การสะท้อนผลลัพธ์ | Reflection (2 คะแนน / 2 pts)
 ตัวอย่างหัวข้อ | Suggested points:
