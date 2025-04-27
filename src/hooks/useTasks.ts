@@ -94,8 +94,9 @@ export function useTasks() {
       setTasks(prevTasks => {
         const updatedTasks = prevTasks.map(task => {
           if (task.id === id) {
-            // ถ้ากำลังจะ mark ว่าเสร็จ ให้บันทึก elapsedTime ล่าสุด
-            if (!task.completed && typeof elapsedTime === 'number') {
+            // ถ้ากำลังจะ mark ว่าเสร็จ และมีค่า elapsedTime 
+            if (!task.completed && elapsedTime !== undefined) {
+              console.log(`Saving elapsed time for task ${id}: ${elapsedTime} seconds`);
               return { ...task, completed: true, elapsedTime };
             }
             // ถ้า uncheck กลับมาเป็นไม่เสร็จ ให้ completed = false แต่ไม่เปลี่ยน elapsedTime

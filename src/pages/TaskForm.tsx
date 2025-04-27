@@ -25,6 +25,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { v4 as uuidv4 } from 'uuid';
 import { useTasks } from '@/hooks/useTasks';
 import { useCategories } from '@/hooks/useCategories';
+import { useTimeTracker } from '@/hooks/useTimeTracker';
 
 const TaskForm = () => {
   const { taskId } = useParams<{ taskId: string }>();
@@ -34,6 +35,16 @@ const TaskForm = () => {
   const { toast } = useToast();
   const { tasks, addTask, updateTask, getTaskById } = useTasks();
   const { categories } = useCategories();
+  
+  // ใช้ time tracker hook
+  const { 
+    isRunning, 
+    elapsedTime, 
+    formatTime, 
+    startTimer, 
+    pauseTimer, 
+    resetTimer 
+  } = useTimeTracker();
 
   // Task fields
   const [title, setTitle] = useState('');
@@ -48,9 +59,7 @@ const TaskForm = () => {
   // Time tracking feature
   const [estimatedTime, setEstimatedTime] = useState('');
   const [timeTrackingEnabled, setTimeTrackingEnabled] = useState(false);
-  const [elapsedTime, setElapsedTime] = useState(0); // seconds
-  const [isTimerRunning, setIsTimerRunning] = useState(false);
-  const [timerInterval, setTimerInterval] = useState<NodeJS.Timeout | null>(null);
+  const [savedElapsedTime, setSavedElapsedTime] = useState(0); // เวลาที่บันทึกไว้
 
   useEffect(() => {
     if (isEditMode && taskId) {
@@ -68,80 +77,42 @@ const TaskForm = () => {
           setTimeTrackingEnabled(true);
         }
         if (task.elapsedTime) {
-          setElapsedTime(task.elapsedTime);
+          setSavedElapsedTime(task.elapsedTime);
+          
+          // ถ้าเป็นการแก้ไขงาน ให้ใช้เวลาที่บันทึกไว้เป็นค่าเริ่มต้น
+          if (timeTrackingEnabled && taskId) {
+            // เริ่มต้นโดยไม่ได้ run timer
+            console.log(`Loaded elapsed time from task: ${task.elapsedTime} seconds`);
+          }
         }
       }
     }
-  }, [taskId, isEditMode, getTaskById]);
-
-  // Cleanup timer on unmount
-  useEffect(() => {
-    return () => {
-      if (timerInterval) {
-        clearInterval(timerInterval);
-      }
-    };
-  }, [timerInterval]);
+  }, [taskId, isEditMode, getTaskById, timeTrackingEnabled]);
 
   const handleDateSelect = (date: Date | undefined) => {
     setDueDate(date);
     setCalendarOpen(false);
   };
 
-  // Format time from seconds to HH:MM:SS
-  const formatTime = (timeInSeconds: number) => {
-    const hours = Math.floor(timeInSeconds / 3600);
-    const minutes = Math.floor((timeInSeconds % 3600) / 60);
-    const seconds = timeInSeconds % 60;
-    
-    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-  };
-
   // Timer controls
-  const startTimer = () => {
-    if (isTimerRunning) return;
-    
-    setIsTimerRunning(true);
-    const interval = setInterval(() => {
-      setElapsedTime(prev => prev + 1);
-    }, 1000);
-    
-    setTimerInterval(interval);
-    
-    toast({
-      title: "เริ่มจับเวลาแล้ว",
-      description: "ระบบกำลังบันทึกเวลาทำงานของคุณ",
-    });
+  const handleStartTimer = () => {
+    if (taskId) {
+      startTimer(taskId, savedElapsedTime);
+    } else {
+      // กรณีเป็นงานใหม่ ให้เริ่มจากเวลาที่บันทึกไว้
+      startTimer(currentTaskId, savedElapsedTime);
+    }
   };
   
-  const pauseTimer = () => {
-    if (!isTimerRunning) return;
-    
-    setIsTimerRunning(false);
-    if (timerInterval) {
-      clearInterval(timerInterval);
-      setTimerInterval(null);
-    }
-    
-    toast({
-      title: "หยุดจับเวลาชั่วคราว",
-      description: `เวลาทำงานสะสม: ${formatTime(elapsedTime)}`,
-    });
+  const handlePauseTimer = () => {
+    // หยุดเวลาและบันทึกลงใน state
+    pauseTimer();
+    setSavedElapsedTime(elapsedTime);
   };
   
-  const resetTimer = () => {
-    if (isTimerRunning && timerInterval) {
-      clearInterval(timerInterval);
-      setTimerInterval(null);
-    }
-    
-    setIsTimerRunning(false);
-    setElapsedTime(0);
-    
-    toast({
-      title: "รีเซ็ตเวลาเรียบร้อย",
-      description: "ระบบได้รีเซ็ตเวลาทำงานเป็นศูนย์แล้ว",
-    });
+  const handleResetTimer = () => {
+    resetTimer();
+    setSavedElapsedTime(0);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -169,8 +140,14 @@ const TaskForm = () => {
         categoryId: categoryId === 'none' ? undefined : categoryId,
         // Time tracking data
         estimatedTime: timeTrackingEnabled ? estimatedTime : undefined,
-        elapsedTime: timeTrackingEnabled ? elapsedTime : undefined,
+        elapsedTime: timeTrackingEnabled ? (isRunning ? elapsedTime : savedElapsedTime) : undefined,
       };
+
+      console.log("Saving task with time tracking:", {
+        enabled: timeTrackingEnabled,
+        estimated: estimatedTime,
+        elapsed: isRunning ? elapsedTime : savedElapsedTime
+      });
 
       if (isEditMode && taskId) {
         // อัพเดทงาน
@@ -195,8 +172,8 @@ const TaskForm = () => {
       }
       
       // ถ้ามีการจับเวลาอยู่ ให้หยุดการจับเวลา
-      if (isTimerRunning && timerInterval) {
-        clearInterval(timerInterval);
+      if (isRunning) {
+        pauseTimer();
       }
       
       // Use setTimeout to ensure state updates before navigation
@@ -212,6 +189,9 @@ const TaskForm = () => {
       });
     }
   };
+
+  // แสดงเวลาปัจจุบัน
+  const currentTimerDisplay = isRunning ? formatTime(elapsedTime) : formatTime(savedElapsedTime);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -354,30 +334,30 @@ const TaskForm = () => {
                       ระบบติดตามเวลาทำงาน
                     </h3>
                     <div className="text-4xl font-mono font-bold text-foreground dark:text-foreground">
-                      {formatTime(elapsedTime)}
+                      {currentTimerDisplay}
                     </div>
                   </div>
                   
                   <div className="grid grid-cols-3 gap-px bg-border dark:bg-border">
                     <Button 
                       type="button"
-                      onClick={startTimer}
-                      disabled={isTimerRunning}
+                      onClick={handleStartTimer}
+                      disabled={isRunning}
                       className="rounded-none bg-emerald-600 hover:bg-emerald-700 text-white dark:bg-emerald-600 dark:hover:bg-emerald-700 dark:text-white h-14"
                     >
                       <Play className="w-5 h-5" />
                     </Button>
                     <Button 
                       type="button"
-                      onClick={pauseTimer}
-                      disabled={!isTimerRunning}
+                      onClick={handlePauseTimer}
+                      disabled={!isRunning}
                       className="rounded-none bg-amber-600 hover:bg-amber-700 text-white dark:bg-amber-600 dark:hover:bg-amber-700 dark:text-white h-14"
                     >
                       <Pause className="w-5 h-5" />
                     </Button>
                     <Button 
                       type="button"
-                      onClick={resetTimer}
+                      onClick={handleResetTimer}
                       className="rounded-none bg-zinc-600 hover:bg-zinc-700 text-white dark:bg-zinc-600 dark:hover:bg-zinc-700 dark:text-white h-14"
                     >
                       <RotateCcw className="w-5 h-5" />
@@ -391,7 +371,7 @@ const TaskForm = () => {
                     </div>
                     <div className="flex items-center justify-between p-3 bg-muted dark:bg-muted rounded-md">
                       <span className="text-sm text-muted-foreground dark:text-muted-foreground">เวลาที่ใช้ไป</span>
-                      <span className="font-mono text-foreground dark:text-foreground">{formatTime(elapsedTime)}</span>
+                      <span className="font-mono text-foreground dark:text-foreground">{currentTimerDisplay}</span>
                     </div>
                   </div>
                   
