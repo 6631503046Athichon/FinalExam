@@ -75,17 +75,17 @@ Statistics  ![491188896_1189340865718069_881919231022904486_n](https://github.co
 Statistics  ![491196992_1002637435329595_5850497252059026516_n](https://github.com/user-attachments/assets/2340688c-d560-4009-9509-7852554a693a)
 
 3.1 ประเภท Build | Build Type
-Web Build: สำหรับใช้งานบนเว็บเบราว์เซอร์ (npm run build)
-Android APK: ไฟล์ติดตั้งสำหรับอุปกรณ์ Android
+- Web Build: สำหรับใช้งานบนเว็บเบราว์เซอร์ (npm run build)
+- Android APK: ไฟล์ติดตั้งสำหรับอุปกรณ์ Android
 
 3.2 แพลตฟอร์มที่ทดสอบ | Platform Tested
-เว็บเบราว์เซอร์ - Chrome
-Android - ทดสอบบนอุปกรณ์จริงและ Emulator 
+- เว็บเบราว์เซอร์ - Chrome
+- Android - ทดสอบบนอุปกรณ์จริงและ Emulator 
 
 3.3 ไฟล์ README และวิธีติดตั้ง | README & Install Guide
-ดาวน์โหลดไฟล์ .apk จากลิงก์ที่แนบไว้
-เปิดในอุปกรณ์ Android
-ติดตั้งผ่าน File Manager
+- ดาวน์โหลดไฟล์ .apk จากลิงก์ที่แนบไว้
+- เปิดในอุปกรณ์ Android
+- ติดตั้งผ่าน File Manager
 
 4. การสะท้อนผลลัพธ์ | Reflection (2 คะแนน / 2 pts)
 ตัวอย่างหัวข้อ | Suggested points:
@@ -100,7 +100,7 @@ Android - ทดสอบบนอุปกรณ์จริงและ Emulat
 5. การใช้ AI ช่วยพัฒนา | AI Assisted Development (Bonus / ใช้ประกอบการพิจารณา)
 5.1 ใช้ AI ช่วยคิดไอเดีย | Idea Generation
 Prompt: "พัฒนาระบบจับเวลาการทำงานที่เป็นประโยชน์สำหรับผู้ใช้และเข้าถึงได้จากหลายจุดในแอป"
-ผลลัพธ์: AI ช่วยพัฒนา useTimeTracker hook ที่สามารถใช้จับเวลาได้ทั้งในหน้าแดชบอร์ด รายการงาน และหน้าแก้ไขงาน
+ ผลลัพธ์: AI ช่วยพัฒนา useTimeTracker hook ที่สามารถใช้จับเวลาได้ทั้งในหน้าแดชบอร์ด รายการงาน และหน้าแก้ไขงาน
 
 5.2 ใช้ AI ช่วยออกแบบ UI | UI Layout Prompt
 Prompt: "ช่วยออกแบบหน้าแดชบอร์ดที่แสดงงานที่กำลังทำอยู่และงานที่สำคัญ"
