@@ -76,4 +76,34 @@ Checklist:
 - ได้ประสบการณ์จริงในการสร้าง app.apk ใช้งานจริง           
 
 5. การใช้ AI ช่วยพัฒนา | AI Assisted Development (Bonus / ใช้ประกอบการพิจารณา)                   
-- ใช้ AI ช่วยคิดไอเดีย, ออกแบบ UI, เขียนโค้ด, debug, deploy (รายละเอียดตามเดิม)
+
+5.1 ใช้ AI ช่วยคิดไอเดีย | Idea Generation
+Prompt ที่ใช้:
+"ช่วยคิดไอเดียแอป Todo สำหรับนักศึกษาที่ต้องการจัดการงานและตารางเรียน"
+ผลลัพธ์:
+ได้ไอเดียแอป Todo ที่มีฟีเจอร์หลักๆ เช่น การเพิ่ม/แก้ไข/ลบงาน, การจัดหมวดหมู่, การกำหนดความสำคัญ, การค้นหาและกรองงาน, และการเก็บข้อมูลแบบ Local Storage
+
+5.2 ใช้ AI ช่วยออกแบบ UI | UI Layout
+Prompt ที่ใช้:
+"ออกแบบ UI สำหรับแอป Todo ที่ใช้ Tailwind CSS และ shadcn/ui ให้ดูทันสมัยและใช้งานง่าย"
+ผลลัพธ์:
+ได้การออกแบบที่ใช้ Card layout สำหรับแสดงรายการงาน, สีเพื่อแสดงความสำคัญ (สีแดง=สูง, สีส้ม=กลาง, สีฟ้า=ต่ำ), ปุ่มสำหรับเพิ่ม/แก้ไข/ลบงาน, และระบบกรองงานตามสถานะ
+
+5.3 ใช้ AI ช่วยเขียนโค้ด | Code Writing
+Prompt ที่ใช้:
+"เขียนโค้ด React + TypeScript สำหรับระบบจัดการ Todo items ที่สามารถเพิ่ม แก้ไข ลบ และทำเครื่องหมายงานเสร็จ"
+ผลลัพธ์:
+ได้โค้ดสำหรับระบบจัดการ Todo items ที่มีฟังก์ชันหลักๆ เช่น addTodo, editTodo, deleteTodo, toggleTodoStatus และระบบจัดเก็บข้อมูลลง localStorage
+
+5.4 ใช้ AI ช่วย debug | Debug
+Prompt ที่ใช้:
+"แอป Todo ไม่สามารถบันทึกข้อมูลลง localStorage ได้ มีวิธีแก้อย่างไร?"
+ผลลัพธ์:
+AI แนะนำให้ใช้ useEffect เพื่อโหลดข้อมูลจาก localStorage เมื่อแอปเริ่มต้น และใช้ useEffect เพื่อบันทึกข้อมูลลง localStorage ทุกครั้งที่มีการเปลี่ยนแปลงข้อมูล
+
+5.5 ใช้ AI ช่วย Deploy | Deployment
+Prompt ที่ใช้:
+"คำสั่งและขั้นตอนสำหรับการ build แอป React เป็น Android APK ด้วย Capacitor"
+ผลลัพธ์:
+AI แนะนำขั้นตอนและคำสั่งที่ต้องใช้: npm run build, npx cap add android, npx cap sync android, npx cap open android และวิธีการ build APK จาก Android Studio
+
