@@ -3,8 +3,8 @@
 รหัสนักศึกษา (Student ID): 6631503046           
 ชื่อแอป (App Name):Todo App           
 Framework ที่ใช้ (Framework Used): React + Capacitor              
-ลิงก์ GitHub Repository: https://github.com/6631503046Athichon/FinalExam           
-ลิงก์ไฟล์ติดตั้ง (APK/IPA): https://drive.google.com/file/d/1MWEPQi5czquUxo0d0q8sngEwHbF3yS1s/view?usp=sharing              
+ลิงก์ GitHub Repository: https://github.com/6631503046Athichon/FinalExam       
+ลิงก์ไฟล์ติดตั้ง (APK/IPA): https://drive.google.com/file/d/1ilPb5vSA1XgEtzg_ZWUZpyqlV_ooDFCD/view?usp=sharing         
 
 1.1 ผู้ใช้งานเป้าหมาย | User Personas         
 Persona 1:            
