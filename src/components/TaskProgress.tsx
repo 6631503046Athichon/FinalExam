@@ -1,30 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { PieChart, Activity, Clock, CheckSquare, CalendarClock, BarChart3 } from 'lucide-react';
+import { PieChart, Activity, CheckSquare, CalendarClock, BarChart3, CheckCircle } from 'lucide-react';
 import { useTasks } from '@/hooks/useTasks';
 
 export interface TaskStatistics {
   totalTasks: number;
   completedTasks: number;
   overdueTasks: number;
-  tasksWithTracking: number;
-  totalElapsedTime: number;
-  avgElapsedTime: number;
   completionRate: number;
 }
-
-const formatTime = (seconds: number): string => {
-  if (!seconds) return '0 นาที';
-  
-  const hours = Math.floor(seconds / 3600);
-  const minutes = Math.floor((seconds % 3600) / 60);
-  
-  if (hours > 0) {
-    return `${hours} ชั่วโมง ${minutes > 0 ? `${minutes} นาที` : ''}`;
-  }
-  return `${minutes} นาที`;
-};
 
 export const TaskProgress: React.FC = () => {
   const { tasks } = useTasks();
@@ -33,9 +18,6 @@ export const TaskProgress: React.FC = () => {
     totalTasks: 0,
     completedTasks: 0,
     overdueTasks: 0,
-    tasksWithTracking: 0,
-    totalElapsedTime: 0,
-    avgElapsedTime: 0,
     completionRate: 0
   });
   
@@ -56,18 +38,6 @@ export const TaskProgress: React.FC = () => {
           new Date(task.dueDate) < now
         ).length;
         
-        const tasksWithTracking = tasks.filter(task => 
-          task.elapsedTime && task.elapsedTime > 0
-        ).length;
-        
-        const totalElapsedTime = tasks.reduce((total, task) => 
-          total + (task.elapsedTime || 0), 0
-        );
-        
-        const avgElapsedTime = tasksWithTracking > 0 
-          ? Math.floor(totalElapsedTime / tasksWithTracking) 
-          : 0;
-        
         const completionRate = totalTasks > 0 
           ? (completedTasks / totalTasks) * 100 
           : 0;
@@ -76,9 +46,6 @@ export const TaskProgress: React.FC = () => {
           totalTasks,
           completedTasks,
           overdueTasks,
-          tasksWithTracking,
-          totalElapsedTime,
-          avgElapsedTime,
           completionRate
         });
         
@@ -194,30 +161,25 @@ export const TaskProgress: React.FC = () => {
                     <p className="text-xl font-bold">{stats.overdueTasks}</p>
                   </div>
                   
-                  <div className="bg-indigo-100 dark:bg-slate-800 p-3 rounded-lg flex flex-col items-center text-center shadow-sm">
-                    <Clock className="h-6 w-6 text-indigo-500 mb-1" />
-                    <p className="text-xs text-muted-foreground">จับเวลา</p>
-                    <p className="text-xl font-bold">{stats.tasksWithTracking}</p>
+                  <div className="bg-emerald-100 dark:bg-slate-800 p-3 rounded-lg flex flex-col items-center text-center shadow-sm">
+                    <CheckCircle className="h-6 w-6 text-emerald-500 mb-1" />
+                    <p className="text-xs text-muted-foreground">เสร็จสิ้น</p>
+                    <p className="text-xl font-bold">{stats.completedTasks}</p>
                   </div>
                 </div>
                 
-                <div className="space-y-4 pt-2">
-                  <h4 className="text-sm font-medium">สถิติการใช้เวลา</h4>
-                  <div className="space-y-3">
-                    <div className="bg-blue-50 dark:bg-slate-800 p-4 rounded-lg shadow-sm">
-                      <p className="text-xs text-muted-foreground mb-1">เวลาทำงานทั้งหมด</p>
-                      <div className="flex items-center">
-                        <Clock className="h-5 w-5 text-blue-500 mr-2" />
-                        <p className="text-xl font-bold">{formatTime(stats.totalElapsedTime)}</p>
-                      </div>
+                {/* แสดงอัตราการเสร็จสิ้นงาน */}
+                <div className="col-span-3 mt-2">
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm text-muted-foreground">อัตราการเสร็จสิ้น</p>
+                      <p className="text-sm font-semibold">{stats.completionRate.toFixed(0)}%</p>
                     </div>
-                    
-                    <div className="bg-purple-50 dark:bg-slate-800 p-4 rounded-lg shadow-sm">
-                      <p className="text-xs text-muted-foreground mb-1">เวลาเฉลี่ยต่องาน</p>
-                      <div className="flex items-center">
-                        <Clock className="h-5 w-5 text-purple-500 mr-2" />
-                        <p className="text-xl font-bold">{formatTime(stats.avgElapsedTime)}</p>
-                      </div>
+                    <div className="h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-emerald-500 rounded-full" 
+                        style={{ width: `${stats.completionRate}%` }}
+                      ></div>
                     </div>
                   </div>
                 </div>

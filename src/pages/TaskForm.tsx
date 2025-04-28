@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/popover";
 import { format } from "date-fns";
 import { th } from "date-fns/locale";
-import { CalendarIcon, Clock, ChevronUp, ChevronDown, Bell, Timer, Play, Pause, RotateCcw } from "lucide-react";
+import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   Select,
@@ -22,10 +22,8 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { v4 as uuidv4 } from 'uuid';
 import { useTasks } from '@/hooks/useTasks';
 import { useCategories } from '@/hooks/useCategories';
-import { useTimeTracker } from '@/hooks/useTimeTracker';
 
 const TaskForm = () => {
   const { taskId } = useParams<{ taskId: string }>();
@@ -35,16 +33,6 @@ const TaskForm = () => {
   const { toast } = useToast();
   const { tasks, addTask, updateTask, getTaskById } = useTasks();
   const { categories } = useCategories();
-  
-  // ใช้ time tracker hook
-  const { 
-    isRunning, 
-    elapsedTime, 
-    formatTime, 
-    startTimer, 
-    pauseTimer, 
-    resetTimer 
-  } = useTimeTracker();
 
   // Task fields
   const [title, setTitle] = useState('');
@@ -55,11 +43,6 @@ const TaskForm = () => {
   
   // Calendar state
   const [calendarOpen, setCalendarOpen] = useState(false);
-  
-  // Time tracking feature
-  const [estimatedTime, setEstimatedTime] = useState('');
-  const [timeTrackingEnabled, setTimeTrackingEnabled] = useState(false);
-  const [savedElapsedTime, setSavedElapsedTime] = useState(0); // เวลาที่บันทึกไว้
 
   useEffect(() => {
     if (isEditMode && taskId) {
@@ -70,49 +53,13 @@ const TaskForm = () => {
         task.dueDate && setDueDate(new Date(task.dueDate));
         setPriority(task.priority as 'low' | 'medium' | 'high');
         setCategoryId(task.categoryId || 'none');
-        
-        // Set time tracking data if exists
-        if (task.estimatedTime) {
-          setEstimatedTime(task.estimatedTime);
-          setTimeTrackingEnabled(true);
-        }
-        if (task.elapsedTime) {
-          setSavedElapsedTime(task.elapsedTime);
-          
-          // ถ้าเป็นการแก้ไขงาน ให้ใช้เวลาที่บันทึกไว้เป็นค่าเริ่มต้น
-          if (timeTrackingEnabled && taskId) {
-            // เริ่มต้นโดยไม่ได้ run timer
-            console.log(`Loaded elapsed time from task: ${task.elapsedTime} seconds`);
-      }
-        }
       }
     }
-  }, [taskId, isEditMode, getTaskById, timeTrackingEnabled]);
+  }, [taskId, isEditMode, getTaskById]);
 
   const handleDateSelect = (date: Date | undefined) => {
     setDueDate(date);
     setCalendarOpen(false);
-  };
-
-  // Timer controls
-  const handleStartTimer = () => {
-    if (taskId) {
-      startTimer(taskId, savedElapsedTime);
-    } else {
-      // กรณีเป็นงานใหม่ ให้เริ่มจากเวลาที่บันทึกไว้
-      startTimer(currentTaskId, savedElapsedTime);
-    }
-  };
-  
-  const handlePauseTimer = () => {
-    // หยุดเวลาและบันทึกลงใน state
-    pauseTimer();
-    setSavedElapsedTime(elapsedTime);
-  };
-  
-  const handleResetTimer = () => {
-    resetTimer();
-    setSavedElapsedTime(0);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -138,16 +85,7 @@ const TaskForm = () => {
         dueDate: dueDate ? dueDate.toISOString() : null,
         priority,
         categoryId: categoryId === 'none' ? undefined : categoryId,
-        // Time tracking data
-        estimatedTime: timeTrackingEnabled ? estimatedTime : undefined,
-        elapsedTime: timeTrackingEnabled ? (isRunning ? elapsedTime : savedElapsedTime) : undefined,
       };
-
-      console.log("Saving task with time tracking:", {
-        enabled: timeTrackingEnabled,
-        estimated: estimatedTime,
-        elapsed: isRunning ? elapsedTime : savedElapsedTime
-      });
 
       if (isEditMode && taskId) {
         // อัพเดทงาน
@@ -171,15 +109,7 @@ const TaskForm = () => {
         });
       }
       
-      // ถ้ามีการจับเวลาอยู่ ให้หยุดการจับเวลา
-      if (isRunning) {
-        pauseTimer();
-      }
-      
-      // Use setTimeout to ensure state updates before navigation
-      setTimeout(() => {
-        navigate("/tasks");
-      }, 100);
+      navigate("/tasks");
     } catch (error) {
       console.error("Error saving task:", error);
       toast({
@@ -189,9 +119,6 @@ const TaskForm = () => {
       });
     }
   };
-
-  // แสดงเวลาปัจจุบัน
-  const currentTimerDisplay = isRunning ? formatTime(elapsedTime) : formatTime(savedElapsedTime);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -278,111 +205,24 @@ const TaskForm = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <label htmlFor="category" className="text-sm font-medium">
-                  หมวดหมู่
-                </label>
-                <Select value={categoryId} onValueChange={setCategoryId}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="เลือกหมวดหมู่" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">ไม่มีหมวดหมู่</SelectItem>
-                    {categories.map((category) => (
-                      <SelectItem key={category.id} value={category.id}>
-                        {category.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <label htmlFor="estimatedTime" className="text-sm font-medium">
-                    เวลาที่คาดว่าจะใช้
-                  </label>
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      id="enableTimeTracking"
-                      checked={timeTrackingEnabled}
-                      onChange={(e) => setTimeTrackingEnabled(e.target.checked)}
-                      className="mr-2"
-                    />
-                    <label htmlFor="enableTimeTracking" className="text-xs">เปิดใช้งาน</label>
-                  </div>
-                </div>
-                
-                <Input
-                  id="estimatedTime"
-                  value={estimatedTime}
-                  onChange={(e) => setEstimatedTime(e.target.value)}
-                  placeholder="เช่น 2 ชั่วโมง, 30 นาที"
-                  disabled={!timeTrackingEnabled}
-                />
-              </div>
+            <div className="space-y-2">
+              <label htmlFor="category" className="text-sm font-medium">
+                หมวดหมู่
+              </label>
+              <Select value={categoryId} onValueChange={setCategoryId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="เลือกหมวดหมู่" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">ไม่มีหมวดหมู่</SelectItem>
+                  {categories.map((category) => (
+                    <SelectItem key={category.id} value={category.id}>
+                      {category.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
-            
-            {timeTrackingEnabled && (
-              <div className="border rounded-lg bg-background dark:bg-background">
-                <div className="flex flex-col">
-                  <div className="flex flex-col items-center py-6 border-b">
-                    <h3 className="text-base font-medium flex items-center mb-4 text-foreground dark:text-foreground">
-                      <Timer className="w-4 h-4 mr-2" /> 
-                      ระบบติดตามเวลาทำงาน
-                    </h3>
-                    <div className="text-4xl font-mono font-bold text-foreground dark:text-foreground">
-                      {currentTimerDisplay}
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-3 gap-px bg-border dark:bg-border">
-                    <Button 
-                      type="button"
-                      onClick={handleStartTimer}
-                      disabled={isRunning}
-                      className="rounded-none bg-emerald-600 hover:bg-emerald-700 text-white dark:bg-emerald-600 dark:hover:bg-emerald-700 dark:text-white h-14"
-                    >
-                      <Play className="w-5 h-5" />
-                    </Button>
-                    <Button 
-                      type="button"
-                      onClick={handlePauseTimer}
-                      disabled={!isRunning}
-                      className="rounded-none bg-amber-600 hover:bg-amber-700 text-white dark:bg-amber-600 dark:hover:bg-amber-700 dark:text-white h-14"
-                    >
-                      <Pause className="w-5 h-5" />
-                    </Button>
-                    <Button 
-                      type="button"
-                      onClick={handleResetTimer}
-                      className="rounded-none bg-zinc-600 hover:bg-zinc-700 text-white dark:bg-zinc-600 dark:hover:bg-zinc-700 dark:text-white h-14"
-                    >
-                      <RotateCcw className="w-5 h-5" />
-                    </Button>
-                  </div>
-
-                  <div className="p-4 space-y-2">
-                    <div className="flex items-center justify-between p-3 bg-muted dark:bg-muted rounded-md">
-                      <span className="text-sm text-muted-foreground dark:text-muted-foreground">เวลาที่คาดว่าจะใช้</span>
-                      <span className="font-mono text-foreground dark:text-foreground">{estimatedTime || "1 นาที"}</span>
-                    </div>
-                    <div className="flex items-center justify-between p-3 bg-muted dark:bg-muted rounded-md">
-                      <span className="text-sm text-muted-foreground dark:text-muted-foreground">เวลาที่ใช้ไป</span>
-                      <span className="font-mono text-foreground dark:text-foreground">{currentTimerDisplay}</span>
-                    </div>
-                  </div>
-                  
-                  <div className="px-4 pb-4">
-                    <p className="text-xs text-center text-muted-foreground dark:text-muted-foreground">
-                      เวลาทำงานจะถูกบันทึกอัตโนมัติเมื่อคุณบันทึกงาน
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
           </CardContent>
 
           <CardFooter className="flex flex-col gap-3">

@@ -5,7 +5,6 @@ import { Plus, Search } from "lucide-react";
 import { Link } from "react-router-dom";
 import TaskItem from "@/components/TaskItem";
 import { useTasks } from "@/hooks/useTasks";
-import { useTimeTracker } from "@/hooks/useTimeTracker";
 import {
   Select,
   SelectContent,
@@ -17,7 +16,6 @@ import { toast } from "@/hooks/use-toast";
 
 const TaskList = () => {
   const { tasks, toggleTaskCompletion, deleteTask } = useTasks();
-  const { stopAndMarkAsCompleted, currentTaskId } = useTimeTracker();
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
 
@@ -45,25 +43,14 @@ const TaskList = () => {
   const handleToggleComplete = (id: string) => {
     const task = tasks.find(t => t.id === id);
     if (task) {
-      // หยุดจับเวลาถ้ากำลังจับเวลาอยู่และเราตั้งค่าให้งานเสร็จ
       if (!task.completed) {
-        console.log(`Task ${id} marked as completed, current task tracking: ${currentTaskId}`);
-        
-        // ถ้าเป็นงานที่กำลังจับเวลาอยู่ในปัจจุบัน
-        if (currentTaskId === id) {
-          // ใช้ฟังก์ชันหยุดจับเวลาและมาร์คเป็นเสร็จเลย
-          stopAndMarkAsCompleted(id);
-        } else {
-          // ถ้าไม่ใช่งานที่กำลังจับเวลา ใช้ toggleTaskCompletion ปกติ
-          toggleTaskCompletion(id, task.elapsedTime || 0);
+        // ถ้าไม่ใช่งานที่กำลังจับเวลา ใช้ toggleTaskCompletion ปกติ
+        toggleTaskCompletion(id);
           
-          toast({
-            title: "งานเสร็จสิ้น",
-            description: task.elapsedTime 
-              ? `บันทึกเวลาทำงาน ${Math.floor(task.elapsedTime / 60)} นาที ${task.elapsedTime % 60} วินาที`
-              : "สถานะงานถูกอัพเดทเป็นเสร็จสิ้น",
-          });
-        }
+        toast({
+          title: "งานเสร็จสิ้น",
+          description: "สถานะงานถูกอัพเดทเป็นเสร็จสิ้น",
+        });
       } else {
         // ถ้าเป็นการยกเลิกเช็คว่างานเสร็จแล้ว
         toggleTaskCompletion(id);
@@ -77,12 +64,6 @@ const TaskList = () => {
   };
 
   const handleDeleteTask = (id: string) => {
-    // หยุดจับเวลาถ้างานนี้กำลังจับเวลาอยู่
-    if (currentTaskId === id) {
-      // หยุดการจับเวลา
-      stopAndMarkAsCompleted(id);
-    }
-    
     deleteTask(id);
     toast({
       title: "ลบงานสำเร็จ",

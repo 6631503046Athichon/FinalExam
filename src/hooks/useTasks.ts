@@ -68,6 +68,21 @@ export function useTasks() {
     }
   }, []);
 
+  const toggleTaskCompletion = (id: string) => {
+    setTasks(prevTasks => {
+      const updatedTasks = prevTasks.map(task => {
+        if (task.id === id) {
+          return { ...task, completed: !task.completed, updatedAt: new Date().toISOString() };
+        }
+        return task;
+      });
+      
+      // บันทึกลง localStorage โดยตรง
+      localStorage.setItem(TASKS_STORAGE_KEY, JSON.stringify(updatedTasks));
+      return updatedTasks;
+    });
+  };
+
   return {
     tasks,
     getTaskById,
@@ -90,24 +105,7 @@ export function useTasks() {
         return updatedTasks;
       });
     }, []),
-    toggleTaskCompletion: useCallback((id: string, elapsedTime?: number) => {
-      setTasks(prevTasks => {
-        const updatedTasks = prevTasks.map(task => {
-          if (task.id === id) {
-            // ถ้ากำลังจะ mark ว่าเสร็จ และมีค่า elapsedTime 
-            if (!task.completed && elapsedTime !== undefined) {
-              console.log(`Saving elapsed time for task ${id}: ${elapsedTime} seconds`);
-              return { ...task, completed: true, elapsedTime };
-            }
-            // ถ้า uncheck กลับมาเป็นไม่เสร็จ ให้ completed = false แต่ไม่เปลี่ยน elapsedTime
-            return { ...task, completed: !task.completed };
-          }
-          return task;
-        });
-        localStorage.setItem(TASKS_STORAGE_KEY, JSON.stringify(updatedTasks));
-        return updatedTasks;
-      });
-    }, []),
+    toggleTaskCompletion,
     deleteTask: useCallback((id: string) => {
       setTasks(prevTasks => {
         const updatedTasks = prevTasks.filter(task => task.id !== id);
@@ -117,4 +115,4 @@ export function useTasks() {
       });
     }, [])
   };
-}
+} 
